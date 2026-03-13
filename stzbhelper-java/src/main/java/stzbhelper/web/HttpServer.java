@@ -259,13 +259,6 @@ public class HttpServer {
       ctx.json(ApiResponse.success(data));
     }));
 
-    app.get("/v1/stzb/player/team/get", wrap(ctx -> {
-      String name = ctx.queryParam("atkname");
-      String union = ctx.queryParam("atkunionname");
-      String idu = ctx.queryParam("idu");
-      ctx.json(ApiResponse.success(storage.getPlayerTeam(name, union, idu)));
-    }));
-
     addAny("/v1/enable/getBattleReport", wrap(ctx -> {
       GlobalState.exVar.needGetBattleData = true;
       ctx.json(ApiResponse.success(null));
