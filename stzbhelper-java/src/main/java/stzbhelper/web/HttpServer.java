@@ -32,13 +32,22 @@ public class HttpServer {
     });
 
     app.get("/", ctx -> ctx.redirect("/index.html"));
+    app.get("/data.html", ctx -> ctx.redirect("/index.html"));
     
     app.before("/v1/*", ctx -> {
       System.out.println("API Request: " + ctx.method() + " " + ctx.path());
     });
 
     registerRoutes();
-    app.error(404, ctx -> ctx.json(ApiResponse.error("404 - Page Not Found")));
+    
+    app.error(404, ctx -> {
+      if (!ctx.path().startsWith("/v1/")) {
+        ctx.redirect("/index.html");
+      } else {
+        ctx.json(ApiResponse.error("404 - API Not Found"));
+      }
+    });
+    
     app.start(port);
   }
 
