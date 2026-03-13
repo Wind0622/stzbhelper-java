@@ -58,6 +58,8 @@ java-test/
 [http://127.0.0.1:9527](http://127.0.0.1:9527)
 *(如果指定了其他端口，请相应修改 URL)*
 
+> **提示**: 如果在 PowerShell/CMD 中看到中文字符显示为乱码（如 `锟斤拷`），可以在运行前输入 `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8` (仅限 PowerShell) 切换终端编码。
+
 ## 功能映射
 
 | 功能 | Go 版本位置 | Java 模块 |

@@ -6,9 +6,13 @@ import stzbhelper.global.GlobalState;
 import stzbhelper.storage.Database;
 import stzbhelper.storage.StorageService;
 import stzbhelper.web.HttpServer;
+import java.io.PrintStream;
 
 public class MainApp {
   public static void main(String[] args) throws Exception {
+    System.setOut(new PrintStream(System.out, true, "UTF-8"));
+    System.setErr(new PrintStream(System.err, true, "UTF-8"));
+
     Database database = new Database();
     StorageService storage = new StorageService(database);
     storage.init("stzbhelper");
