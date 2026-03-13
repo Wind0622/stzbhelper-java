@@ -19,31 +19,25 @@ java-test/
 
 ## 环境要求
 
-- Windows 需要安装 Npcap，并允许应用抓包
-- 抓包通常需要管理员权限运行
-- JDK 21 已在本机路径 `C:\Users\23266\.jdks\temurin-21`
+- **Npcap**: Windows 环境下必须安装 Npcap，并勾选 WinPcap 兼容模式。
+- **权限**: 抓包模块初始化需要管理员权限运行。
+- **JDK**: 本项目基于 JDK 21 运行。
 
 ## 启动引导
 
 ### 1. 环境准备 (重要)
-- **Npcap**: Windows 用户必须安装 [Npcap](https://npcap.com/)，并勾选 "Install Npcap in WinPcap API-compatible Mode"。
-- **JDK 21**: 推荐使用 [Temurin-21](https://adoptium.net/temurin/releases/?version=21)。
-- **管理员权限**: 抓包功能需要以管理员权限运行终端或 IDE。
+- **Npcap**: 确保已正确安装 [Npcap](https://npcap.com/)。
+- **JDK 21**: 请确保系统已配置好 JDK 21 运行环境。
+- **管理员权限**: 请以管理员权限启动终端运行程序。
 
 ### 2. 一键启动 (推荐)
-在项目根目录 `java-test` 下，直接运行 `run.bat`：
+在项目根目录下直接运行 `run.bat`：
 ```powershell
 ./run.bat
 ```
-*该脚本会自动完成：控制台编码设置 (UTF-8)、项目编译、服务启动。*
+*脚本将自动处理编码设置、项目构建及服务启动。*
 
-### 3. 手动启动
-如果需要更细致的控制，可以进入 `stzbhelper-java` 目录：
-- **编译**: `./gradlew.bat build -x test`
-- **运行**: `./gradlew.bat run`
-- **指定端口**: `./gradlew.bat run --args="9528"`
-
-### 4. 访问界面
+### 3. 访问界面
 启动成功后，浏览器访问：[http://127.0.0.1:9527](http://127.0.0.1:9527)
 
 ## 功能映射
@@ -64,8 +58,3 @@ java-test/
 2. 进入游戏并触发主公簿数据
 3. 观察日志输出是否有协议号与解析结果
 4. 确认 SQLite 数据是否写入
-
-## 常见问题
-
-- 端口被占用：使用 `--args` 指定其他端口或设置 `STZB_PORT`
-- 抓包失败：确认 Npcap 安装、管理员权限、以及目标端口 `8001`
