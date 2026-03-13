@@ -67,6 +67,7 @@ public class StorageService {
         stmt.addBatch();
       }
       stmt.executeBatch();
+      System.out.println("Saved/Updated " + users.size() + " team members in database");
     }
   }
 
@@ -74,7 +75,10 @@ public class StorageService {
     Connection conn = database.getConnection();
     if (ids == null || ids.isEmpty()) {
       try (Statement stmt = conn.createStatement()) {
-        stmt.executeUpdate("DELETE FROM team_user");
+        int deleted = stmt.executeUpdate("DELETE FROM team_user");
+        if (deleted > 0) {
+          System.out.println("Cleared " + deleted + " old team members from database");
+        }
       }
       return;
     }
@@ -90,7 +94,10 @@ public class StorageService {
       for (int i = 0; i < ids.size(); i++) {
         stmt.setInt(i + 1, ids.get(i));
       }
-      stmt.executeUpdate();
+      int deleted = stmt.executeUpdate();
+      if (deleted > 0) {
+        System.out.println("Removed " + deleted + " inactive team members from database");
+      }
     }
   }
 

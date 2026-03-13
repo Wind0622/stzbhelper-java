@@ -32,6 +32,11 @@ public class HttpServer {
     });
 
     app.get("/", ctx -> ctx.redirect("/index.html"));
+    
+    app.before("/v1/*", ctx -> {
+      System.out.println("API Request: " + ctx.method() + " " + ctx.path());
+    });
+
     registerRoutes();
     app.error(404, ctx -> ctx.json(ApiResponse.error("404 - Page Not Found")));
     app.start(port);

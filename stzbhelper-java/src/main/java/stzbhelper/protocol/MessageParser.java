@@ -41,10 +41,10 @@ public class MessageParser {
   }
 
   private void parseTeamUser(byte[] data) {
-    System.out.println("Received team member message");
+    System.out.println("Received team member raw data, size: " + data.length + " bytes");
     byte[] msgData = ProtocolDecoder.parseZlibData(data);
     if (msgData.length == 0) {
-      System.out.println("Failed to parse team member message");
+      System.out.println("Failed to decompress team member data");
       return;
     }
     try {
@@ -58,11 +58,11 @@ public class MessageParser {
           ids.add(user.id);
         }
       }
-      System.out.println("Team member message parsed successfully, total: " + users.size());
+      System.out.println("Successfully parsed " + users.size() + " team members from packet");
       storage.saveTeamUsers(users);
       storage.deleteTeamUsersNotIn(ids);
     } catch (Exception e) {
-      System.out.println("Failed to parse team member message");
+      System.out.println("Error parsing team member JSON: " + e.getMessage());
     }
   }
 
