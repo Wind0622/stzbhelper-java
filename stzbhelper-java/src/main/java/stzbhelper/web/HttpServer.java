@@ -45,7 +45,9 @@ public class HttpServer {
   private void registerRoutes() {
     addAny("/v1/getTeamUser", wrap(ctx -> {
       String group = ctx.queryParam("group");
-      ctx.json(ApiResponse.success(storage.findTeamUsers(group)));
+      List<TeamUser> users = storage.findTeamUsers(group);
+      System.out.println("API Response: getTeamUser returned " + users.size() + " records");
+      ctx.json(ApiResponse.success(users));
     }));
 
     addAny("/v1/getTeamGroup", wrap(ctx -> {
