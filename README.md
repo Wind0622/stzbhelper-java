@@ -23,52 +23,40 @@ java-test/
 - 抓包通常需要管理员权限运行
 - JDK 21 已在本机路径 `C:\Users\23266\.jdks\temurin-21`
 
-## 启动步骤
+## 启动引导
 
-在 `java-test/stzbhelper-java` 目录下执行：
+### 1. 环境检查
+- **Npcap**: Windows 用户必须安装 [Npcap](https://npcap.com/)，并勾选 "Install Npcap in WinPcap API-compatible Mode"。
+- **JDK 21**: 确保本地已安装 JDK 21（推荐使用 Temurin-21）。
+- **管理员权限**: 抓包功能需要以管理员权限运行终端或 IDE。
 
-```bat
-gradlew.bat build -x test
+### 2. 编译项目
+在 `stzbhelper-java` 目录下运行：
+```powershell
+./gradlew.bat build -x test
 ```
 
-启动服务（默认端口 9527）：
+### 3. 启动服务
+你可以通过以下任一方式启动服务（默认监听端口 `9527`）：
 
-```bat
-gradlew.bat run
-```
+- **标准启动**:
+  ```powershell
+  ./gradlew.bat run
+  ```
+- **指定端口启动** (例如端口 9528):
+  ```powershell
+  ./gradlew.bat run --args="9528"
+  ```
+- **使用环境变量**:
+  ```powershell
+  $env:STZB_PORT=9528
+  ./gradlew.bat run
+  ```
 
-指定端口启动（示例 9528）：
-
-```bat
-gradlew.bat run --args="9528"
-```
-
-或使用环境变量：
-
-```bat
-set STZB_PORT=9528
-gradlew.bat run
-```
-
-启动后访问：
-
-```
-http://127.0.0.1:9527
-```
-
-## 一键启动
-
-在 `java-test` 目录下执行：
-
-```bat
-start.bat
-```
-
-指定端口示例：
-
-```bat
-start.bat 9528
-```
+### 4. 访问 Web 界面
+启动成功后，在浏览器访问：
+[http://127.0.0.1:9527](http://127.0.0.1:9527)
+*(如果指定了其他端口，请相应修改 URL)*
 
 ## 功能映射
 
