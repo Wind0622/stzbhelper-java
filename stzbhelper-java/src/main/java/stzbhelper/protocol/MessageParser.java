@@ -25,14 +25,14 @@ public class MessageParser {
   public void parseData(int cmdId, byte[] data) {
     if (GlobalState.isDebug) {
       byte[] msg = ProtocolDecoder.parseZlibData(data);
-      System.out.println("收到[" + cmdId + "]消息:" + new String(msg, StandardCharsets.UTF_8));
+      System.out.println("Received [" + cmdId + "] message: " + new String(msg, StandardCharsets.UTF_8));
     }
 
     if (cmdId == 103) {
       parseTeamUser(data);
     } else if (cmdId == 92) {
       if (GlobalState.exVar.needGetBattleData) {
-        System.out.println("已开启获取详细战报，目前会暂停考勤战报的获取");
+        System.out.println("Detailed battle report collection enabled, pausing attendance report collection.");
         parseBattleData(data);
       } else {
         parseReport(data);
@@ -41,10 +41,10 @@ public class MessageParser {
   }
 
   private void parseTeamUser(byte[] data) {
-    System.out.println("收到同盟成员消息");
+    System.out.println("Received team member message");
     byte[] msgData = ProtocolDecoder.parseZlibData(data);
     if (msgData.length == 0) {
-      System.out.println("解析同盟成员消息失败");
+      System.out.println("Failed to parse team member message");
       return;
     }
     try {
@@ -58,23 +58,23 @@ public class MessageParser {
           ids.add(user.id);
         }
       }
-      System.out.println("同盟成员消息解析成功，共" + users.size() + "人");
+      System.out.println("Team member message parsed successfully, total: " + users.size());
       storage.saveTeamUsers(users);
       storage.deleteTeamUsersNotIn(ids);
     } catch (Exception e) {
-      System.out.println("解析同盟成员消息失败");
+      System.out.println("Failed to parse team member message");
     }
   }
 
   private void parseReport(byte[] data) {
-    System.out.println("收到同盟战报消息");
+    System.out.println("Received team battle report message");
     if (!GlobalState.exVar.needGetReport) {
-      System.out.println("由于未开启获取战报，本次跳过解析");
+      System.out.println("Report collection disabled, skipping parsing.");
       return;
     }
     byte[] msgData = ProtocolDecoder.parseZlibData(data);
     if (msgData.length == 0) {
-      System.out.println("解析同盟战报消息失败");
+      System.out.println("Failed to parse team battle report message");
       return;
     }
     try {
@@ -97,12 +97,12 @@ public class MessageParser {
         }
       }
 
-      System.out.println("解析同盟战报成功，共" + jsondata.size() + "条符合条件的共" + neededReports.size() + "条");
+      System.out.println("Team battle report parsed successfully, total: " + jsondata.size() + ", matching: " + neededReports.size());
       if (!neededReports.isEmpty()) {
         storage.saveReports(neededReports, rawJson);
       }
     } catch (Exception e) {
-      System.out.println("解析同盟战报消息失败");
+      System.out.println("Failed to parse team battle report message");
     }
   }
 
@@ -132,9 +132,9 @@ public class MessageParser {
         storage.saveBattleReport(report);
         battleCount++;
       }
-      System.out.println("共处理" + battleCount + "条战斗记录");
+      System.out.println("Processed " + battleCount + " battle records");
     } catch (Exception e) {
-      System.out.println("解析战报详情失败");
+      System.out.println("Failed to parse detailed battle report");
     }
   }
 

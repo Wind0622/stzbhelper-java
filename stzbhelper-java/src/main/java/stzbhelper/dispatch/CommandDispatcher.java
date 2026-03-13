@@ -96,7 +96,7 @@ public class CommandDispatcher {
       String serverName = String.valueOf(serverList.get(0));
       String dbName = roleName + "_" + serverName;
 
-      System.out.println("收到主公簿数据，将打开数据库文件: " + dbName + ".db");
+      System.out.println("Received user profile data, switching to database: " + dbName + ".db");
       storage.switchTo(dbName);
       GlobalState.onlySrcIp = srcIp;
       GlobalState.onlyDstIp = dstIp;

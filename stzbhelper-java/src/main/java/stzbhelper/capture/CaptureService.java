@@ -74,7 +74,7 @@ public class CaptureService {
             && !GlobalState.onlyDstIp.isEmpty()) {
           if (!GlobalState.onlySrcIp.equals(srcIp) || !GlobalState.onlyDstIp.equals(dstIp)) {
             if (GlobalState.isDebug) {
-              System.out.println("IP信息不符合跳过数据处理");
+              System.out.println("IP mismatch, skipping data processing");
             }
             continue;
           }
