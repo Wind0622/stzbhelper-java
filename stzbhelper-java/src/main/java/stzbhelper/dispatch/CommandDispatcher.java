@@ -28,6 +28,10 @@ public class CommandDispatcher {
     int cmdId = ProtocolDecoder.readInt32(packet, 4);
     int dataType = packet[12] & 0xFF;
 
+    if (cmdId == 92 || cmdId == 103) {
+      System.out.println("Captured packet: cmdId=" + cmdId + ", dataType=" + dataType + ", length=" + packet.length);
+    }
+
     if (dataType == 3 && (cmdId == 103 || cmdId == 92)) {
       if (packet.length - bufSize != 4) {
         GlobalState.lossCmdId = cmdId;

@@ -73,11 +73,12 @@ public class CaptureService {
             && !GlobalState.onlySrcIp.isEmpty()
             && !GlobalState.onlyDstIp.isEmpty()) {
           if (!GlobalState.onlySrcIp.equals(srcIp) || !GlobalState.onlyDstIp.equals(dstIp)) {
-            if (GlobalState.isDebug) {
-              System.out.println("IP mismatch, skipping data processing");
-            }
+            // Log it once in a while or only once to avoid spamming
             continue;
           }
+        } else if (!GlobalState.onlySrcIp.isEmpty()) {
+          // If IP isn't fully bound but we have some IP, let's log it to help user
+          // System.out.println("Capturing traffic from: " + srcIp + " -> " + dstIp);
         }
 
         dispatcher.dispatch(full, srcIp, dstIp);

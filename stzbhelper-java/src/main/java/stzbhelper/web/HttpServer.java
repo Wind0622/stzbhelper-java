@@ -261,11 +261,13 @@ public class HttpServer {
 
     addAny("/v1/enable/getBattleReport", wrap(ctx -> {
       GlobalState.exVar.needGetBattleData = true;
+      System.out.println("Switching: Detailed Battle Data Collection = ENABLED");
       ctx.json(ApiResponse.success(null));
     }));
 
     addAny("/v1/disable/getBattleReport", wrap(ctx -> {
       GlobalState.exVar.needGetBattleData = false;
+      System.out.println("Switching: Detailed Battle Data Collection = DISABLED");
       ctx.json(ApiResponse.success(null));
     }));
   }

@@ -23,6 +23,10 @@ public class MessageParser {
   }
 
   public void parseData(int cmdId, byte[] data) {
+    if (cmdId == 92 || cmdId == 103) {
+      System.out.println("Dispatching to parser: cmdId=" + cmdId + ", dataLength=" + data.length);
+    }
+    
     if (GlobalState.isDebug) {
       byte[] msg = ProtocolDecoder.parseZlibData(data);
       System.out.println("Received [" + cmdId + "] message: " + new String(msg, StandardCharsets.UTF_8));
