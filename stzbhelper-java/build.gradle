@@ -38,4 +38,7 @@ tasks.withType(JavaExec).configureEach {
 
 tasks.withType(JavaCompile).configureEach {
   options.encoding = 'UTF-8'
+  options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+  // 强制编译器输出英文错误信息，解决 Windows 终端显示乱码
+  options.forkOptions.jvmArgs << "-Duser.language=en"
 }
