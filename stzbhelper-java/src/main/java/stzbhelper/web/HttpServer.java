@@ -59,6 +59,12 @@ public class HttpServer {
       ctx.json(ApiResponse.success(users));
     }));
 
+    addAny("/v1/stzb/player/team/get", wrap(ctx -> {
+      List<PlayerTeam> teams = storage.getPlayerTeams();
+      System.out.println("API Response: getPlayerTeams returned " + teams.size() + " records");
+      ctx.json(ApiResponse.success(teams));
+    }));
+
     addAny("/v1/getTeamGroup", wrap(ctx -> {
       ctx.json(ApiResponse.success(storage.findTeamGroups()));
     }));

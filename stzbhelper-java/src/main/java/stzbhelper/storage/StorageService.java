@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import stzbhelper.model.BattleReport;
+import stzbhelper.model.PlayerTeam;
 import stzbhelper.model.Report;
 import stzbhelper.model.Task;
 import stzbhelper.model.TaskUserList;
@@ -391,6 +392,77 @@ public class StorageService {
       stmt.setLong(i++, report.result);
       stmt.executeUpdate();
     }
+  }
+
+  public synchronized List<PlayerTeam> getPlayerTeams() throws SQLException {
+    Connection conn = database.getConnection();
+    String sql = """
+        WITH ranked_data AS (
+          SELECT attack_name AS player_name, attack_hero1_id AS hero1_id, attack_hero2_id AS hero2_id, attack_hero3_id AS hero3_id,
+                 attack_hero1_level AS hero1_level, attack_hero2_level AS hero2_level, attack_hero3_level AS hero3_level,
+                 attack_hero1_star AS hero1_star, attack_hero2_star AS hero2_star, attack_hero3_star AS hero3_star,
+                 attack_total_star AS total_star, attack_hp AS hp, attacker_gear_info AS gear, attack_hero_type AS hero_type,
+                 attack_idu AS idu, time, all_skill_info, battle_id, 'attack' AS role,
+                 ROW_NUMBER() OVER (PARTITION BY attack_name, attack_hero1_id ORDER BY attack_hero1_level DESC, time DESC) AS rn
+          FROM battle_report
+          WHERE attack_hero1_id != 0 AND attack_hero2_id != 0 AND attack_hero3_id != 0
+            AND attack_hero1_level >= 15 AND attack_hero2_level >= 15 AND attack_hero3_level >= 15
+            AND attack_hp >= 10000 AND npc = 0 AND all_skill_info != "" AND all_skill_info IS NOT NULL
+          UNION ALL
+          SELECT defend_name AS player_name, defend_hero1_id AS hero1_id, defend_hero2_id AS hero2_id, defend_hero3_id AS hero3_id,
+                 defend_hero1_level AS hero1_level, defend_hero2_level AS hero2_level, defend_hero3_level AS hero3_level,
+                 defend_hero1_star AS hero1_star, defend_hero2_star AS hero2_star, defend_hero3_star AS hero3_star,
+                 defend_total_star AS total_star, defend_hp AS hp, defender_gear_info AS gear, defend_hero_type AS hero_type,
+                 defend_idu AS idu, time, all_skill_info, battle_id, 'defend' AS role,
+                 ROW_NUMBER() OVER (PARTITION BY defend_name, defend_hero1_id ORDER BY defend_hero1_level DESC, time DESC) AS rn
+          FROM battle_report
+          WHERE defend_hero1_id != 0 AND defend_hero2_id != 0 AND defend_hero3_id != 0
+            AND defend_hero1_level >= 15 AND defend_hero2_level >= 15 AND defend_hero3_level >= 15
+            AND defend_hp >= 10000 AND npc = 0 AND all_skill_info != "" AND all_skill_info IS NOT NULL
+        ),
+        deduplicated_data AS (
+          SELECT player_name, hero1_id, hero2_id, hero3_id, hero1_level, hero2_level, hero3_level,
+                 hero1_star, hero2_star, hero3_star, total_star, hp, gear, hero_type, idu, time,
+                 all_skill_info, battle_id, role,
+                 ROW_NUMBER() OVER (PARTITION BY player_name, hero1_id, hero2_id, hero3_id ORDER BY time DESC) AS dedup_rn
+          FROM ranked_data
+          WHERE rn = 1
+        )
+        SELECT player_name, hero1_id, hero2_id, hero3_id, hero1_level, hero2_level, hero3_level,
+               hero1_star, hero2_star, hero3_star, total_star, hp, gear, hero_type, idu, time,
+               all_skill_info, battle_id, role
+        FROM deduplicated_data
+        WHERE dedup_rn = 1
+        ORDER BY player_name, time DESC;
+        """;
+
+    List<PlayerTeam> teams = new ArrayList<>();
+    try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+      while (rs.next()) {
+        PlayerTeam team = new PlayerTeam();
+        team.playerName = rs.getString("player_name");
+        team.hero1Id = rs.getInt("hero1_id");
+        team.hero2Id = rs.getInt("hero2_id");
+        team.hero3Id = rs.getInt("hero3_id");
+        team.hero1Level = rs.getInt("hero1_level");
+        team.hero2Level = rs.getInt("hero2_level");
+        team.hero3Level = rs.getInt("hero3_level");
+        team.hero1Star = rs.getLong("hero1_star");
+        team.hero2Star = rs.getLong("hero2_star");
+        team.hero3Star = rs.getLong("hero3_star");
+        team.totalStar = rs.getLong("total_star");
+        team.hp = rs.getInt("hp");
+        team.gear = rs.getString("gear");
+        team.heroType = rs.getString("hero_type");
+        team.idu = rs.getString("idu");
+        team.time = rs.getLong("time");
+        team.allSkillInfo = rs.getString("all_skill_info");
+        team.battleId = rs.getLong("battle_id");
+        team.role = rs.getString("role");
+        teams.add(team);
+      }
+    }
+    return teams;
   }
 
   public synchronized List<Map<String, Object>> getGroupWuStats() throws SQLException {
