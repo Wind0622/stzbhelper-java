@@ -27,10 +27,11 @@ dependencies {
 
 application {
   mainClass = 'stzbhelper.app.MainApp'
-  applicationDefaultJvmArgs = ["-Dfile.encoding=UTF-8", "-Dsun.stdout.encoding=UTF-8", "-Dsun.stderr.encoding=UTF-8"]
+  // 移除强制编码，让 MainApp.java 内部动态处理
 }
 
 tasks.withType(JavaExec).configureEach {
+  // 保持标准流重定向
   standardOutput = System.out
   errorOutput = System.err
 }
