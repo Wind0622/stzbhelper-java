@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'stzbhelper'
-version = '1.0.0-java-rc1'
+version = '0.0.1-java'
 
 java {
   toolchain {
