@@ -44,7 +44,9 @@ echo [2/3] 正在编译项目 (跳过测试)...
 cd /d "%APP_DIR%"
 call gradlew.bat build -x test >nul
 if errorlevel 1 (
-    echo [错误] 编译失败，请检查代码或 JDK 版本。
+    echo.
+    echo [错误] 编译失败，请检查 JDK 21 是否正确安装，并尝试手动运行:
+    echo cd stzbhelper-java ; ./gradlew.bat build
     pause
     exit /b 1
 )
@@ -52,7 +54,11 @@ if errorlevel 1 (
 echo [3/3] 正在启动服务 (端口: %PORT%)...
 echo ------------------------------------------
 echo 访问地址: http://127.0.0.1:%PORT%
+echo 提示: 如果下方显示乱码，请在窗口右键属性设置字体为 "Consolas" 或 "Lucida Console"
 echo ------------------------------------------
+
+:: 设置 Gradle 控制台为普通模式，减少特殊字符干扰
+set "GRADLE_OPTS=-Dfile.encoding=UTF-8 -Dorg.gradle.console=plain"
 
 :: 启动 Java 服务
 call gradlew.bat run --args="%PORT%"

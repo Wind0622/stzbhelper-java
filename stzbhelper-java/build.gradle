@@ -27,6 +27,12 @@ dependencies {
 
 application {
   mainClass = 'stzbhelper.app.MainApp'
+  applicationDefaultJvmArgs = ["-Dfile.encoding=UTF-8", "-Dsun.stdout.encoding=UTF-8", "-Dsun.stderr.encoding=UTF-8"]
+}
+
+tasks.withType(JavaExec).configureEach {
+  standardOutput = System.out
+  errorOutput = System.err
 }
 
 tasks.withType(JavaCompile).configureEach {
