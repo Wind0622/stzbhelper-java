@@ -5,7 +5,7 @@ public final class GlobalState {
 
   public static final WebExVar exVar = new WebExVar();
   public static volatile boolean isDebug = false;
-  public static final String version = "0.0.3-rc2-fix2";
+  public static final String version = "1.0.0-java-rc1";
 
   public static volatile String onlySrcIp = "";
   public static volatile String onlyDstIp = "";
