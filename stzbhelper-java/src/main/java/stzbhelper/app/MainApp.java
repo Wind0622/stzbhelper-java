@@ -16,19 +16,19 @@ public class MainApp {
       StorageService storage = new StorageService(database);
       storage.init("stzbhelper");
 
-      System.out.println("stzbHelper 正在运行...");
-      System.out.println("版本: " + GlobalState.version);
+      System.out.println("stzbHelper is running...");
+      System.out.println("Version: " + GlobalState.version);
 
       HttpServer httpServer = new HttpServer(storage);
       int port = resolvePort(args);
       httpServer.start(port);
-      System.out.println("HTTP 服务已在端口 " + port + " 启动: http://127.0.0.1:" + port);
+      System.out.println("HTTP Server started on port " + port + ": http://127.0.0.1:" + port);
 
       CommandDispatcher dispatcher = new CommandDispatcher(storage);
       CaptureService captureService = new CaptureService(dispatcher);
       captureService.start();
     } catch (Exception e) {
-      System.err.println("程序启动失败，发生严重错误:");
+      System.err.println("Critical error during startup:");
       e.printStackTrace();
       System.exit(1);
     }
