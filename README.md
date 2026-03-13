@@ -25,40 +25,26 @@ java-test/
 
 ## 启动引导
 
-### 1. 环境检查
+### 1. 环境准备 (重要)
 - **Npcap**: Windows 用户必须安装 [Npcap](https://npcap.com/)，并勾选 "Install Npcap in WinPcap API-compatible Mode"。
-- **JDK 21**: 确保本地已安装 JDK 21（推荐使用 Temurin-21）。
+- **JDK 21**: 推荐使用 [Temurin-21](https://adoptium.net/temurin/releases/?version=21)。
 - **管理员权限**: 抓包功能需要以管理员权限运行终端或 IDE。
 
-### 2. 编译项目
-在 `stzbhelper-java` 目录下运行：
+### 2. 一键启动 (推荐)
+在项目根目录 `java-test` 下，直接运行 `run.bat`：
 ```powershell
-./gradlew.bat build -x test
+./run.bat
 ```
+*该脚本会自动完成：控制台编码设置 (UTF-8)、项目编译、服务启动。*
 
-### 3. 启动服务
-你可以通过以下任一方式启动服务（默认监听端口 `9527`）：
+### 3. 手动启动
+如果需要更细致的控制，可以进入 `stzbhelper-java` 目录：
+- **编译**: `./gradlew.bat build -x test`
+- **运行**: `./gradlew.bat run`
+- **指定端口**: `./gradlew.bat run --args="9528"`
 
-- **标准启动**:
-  ```powershell
-  ./gradlew.bat run
-  ```
-- **指定端口启动** (例如端口 9528):
-  ```powershell
-  ./gradlew.bat run --args="9528"
-  ```
-- **使用环境变量**:
-  ```powershell
-  $env:STZB_PORT=9528
-  ./gradlew.bat run
-  ```
-
-### 4. 访问 Web 界面
-启动成功后，在浏览器访问：
-[http://127.0.0.1:9527](http://127.0.0.1:9527)
-*(如果指定了其他端口，请相应修改 URL)*
-
-> **提示**: 如果在 PowerShell/CMD 中看到中文字符显示为乱码（如 `锟斤拷`），可以在运行前输入 `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8` (仅限 PowerShell) 切换终端编码。
+### 4. 访问界面
+启动成功后，浏览器访问：[http://127.0.0.1:9527](http://127.0.0.1:9527)
 
 ## 功能映射
 
