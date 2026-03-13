@@ -7,10 +7,12 @@ import stzbhelper.storage.Database;
 import stzbhelper.storage.StorageService;
 import stzbhelper.web.HttpServer;
 import java.io.PrintStream;
+import java.io.File;
 
 public class MainApp {
   public static void main(String[] args) {
     setupConsoleEncoding();
+    ensureDataDir();
     try {
       Database database = new Database();
       StorageService storage = new StorageService(database);
@@ -45,6 +47,13 @@ public class MainApp {
         System.setErr(new PrintStream(System.err, true, "UTF-8"));
       }
     } catch (Exception ignored) {}
+  }
+
+  private static void ensureDataDir() {
+    File dataDir = new File("data");
+    if (!dataDir.exists()) {
+      dataDir.mkdirs();
+    }
   }
 
   private static int resolvePort(String[] args) {

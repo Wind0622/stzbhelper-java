@@ -25,12 +25,12 @@ public class Database {
 
   private String normalizeFilename(String dbFile) {
     if (dbFile == null || dbFile.isBlank()) {
-      return "stzbhelper.db";
+      dbFile = "stzbhelper.db";
     }
-    if (dbFile.endsWith(".db")) {
-      return dbFile;
+    if (!dbFile.endsWith(".db")) {
+      dbFile = dbFile + ".db";
     }
-    return dbFile + ".db";
+    return "data/" + dbFile;
   }
 
   private void initSchema() throws SQLException {
