@@ -134,7 +134,8 @@ public class MessageParser {
       }
       System.out.println("Processed " + battleCount + " battle records");
     } catch (Exception e) {
-      System.out.println("Failed to parse detailed battle report");
+      System.out.println("Failed to parse detailed battle report: " + e.getMessage());
+      e.printStackTrace();
     }
   }
 
