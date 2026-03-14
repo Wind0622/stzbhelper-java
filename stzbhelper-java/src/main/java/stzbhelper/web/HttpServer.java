@@ -32,6 +32,13 @@ public class HttpServer {
       });
     });
 
+    app.before(ctx -> {
+      ctx.header("Access-Control-Allow-Origin", "*");
+      ctx.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
+      ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    });
+    app.options("/*", ctx -> ctx.status(200));
+
     app.get("/", ctx -> ctx.redirect("/index.html"));
     app.get("/data.html", ctx -> ctx.redirect("/index.html"));
     app.get("/battle", ctx -> ctx.redirect("/battle.html"));
@@ -150,6 +157,7 @@ public class HttpServer {
       }
       GlobalState.exVar.neededReportPos = pos;
       GlobalState.exVar.needGetReport = true;
+      GlobalState.exVar.needGetBattleData = false;
       ctx.json(ApiResponse.success(null));
     }));
 
@@ -262,6 +270,8 @@ public class HttpServer {
 
     addAny("/v1/enable/getBattleReport", wrap(ctx -> {
       GlobalState.exVar.needGetBattleData = true;
+      GlobalState.exVar.needGetReport = false;
+      GlobalState.exVar.neededReportPos = 0;
       ctx.json(ApiResponse.success(null));
     }));
 

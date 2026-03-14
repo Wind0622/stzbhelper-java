@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import stzbhelper.global.GlobalState;
+import stzbhelper.global.LogUtil;
 import stzbhelper.protocol.MessageParser;
 import stzbhelper.protocol.ProtocolDecoder;
 import stzbhelper.protocol.XorDecoder;
@@ -27,10 +28,6 @@ public class CommandDispatcher {
     int bufSize = ProtocolDecoder.readInt32(packet, 0);
     int cmdId = ProtocolDecoder.readInt32(packet, 4);
     int dataType = packet[12] & 0xFF;
-
-    if (cmdId == 92 || cmdId == 103) {
-      System.out.println("Captured packet: cmdId=" + cmdId + ", dataType=" + dataType + ", length=" + packet.length);
-    }
 
     if (dataType == 3 && (cmdId == 103 || cmdId == 92)) {
       if (packet.length - bufSize != 4) {
@@ -100,16 +97,36 @@ public class CommandDispatcher {
       String serverName = String.valueOf(serverList.get(0));
       String dbName = roleName + "_" + serverName;
 
-      System.out.println("Received user profile data, switching to database: " + dbName + ".db");
+      LogUtil.info("服务器信息: " + formatServerInfo(serverList));
+      LogUtil.info("角色名: " + roleName);
+      LogUtil.info("本地IP：" + dstIp);
+      LogUtil.info("游戏服务器IP：" + srcIp);
+      LogUtil.info("收到主公簿数据，将打开数据库文件" + dbName + ".db");
       storage.switchTo(dbName);
       GlobalState.onlySrcIp = srcIp;
       GlobalState.onlyDstIp = dstIp;
       GlobalState.databaseSelected = true;
     } catch (Exception e) {
-      System.out.println("数据库选择解析失败: " + e.getMessage());
+      LogUtil.info("\u6570\u636e\u5e93\u9009\u62e9\u89e3\u6790\u5931\u8d25: " + e.getMessage());
       if (GlobalState.isDebug) {
         System.out.println(new String(packet, StandardCharsets.UTF_8));
       }
     }
+  }
+
+  private String formatServerInfo(List<?> serverList) {
+    if (serverList == null || serverList.isEmpty()) {
+      return "[]";
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append("[");
+    for (int i = 0; i < serverList.size(); i++) {
+      if (i > 0) {
+        sb.append(" ");
+      }
+      sb.append(String.valueOf(serverList.get(i)));
+    }
+    sb.append("]");
+    return sb.toString();
   }
 }

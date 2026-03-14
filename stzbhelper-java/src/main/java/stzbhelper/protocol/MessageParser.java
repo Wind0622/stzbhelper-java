@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import stzbhelper.global.GlobalState;
+import stzbhelper.global.LogUtil;
 import stzbhelper.model.BattleData;
 import stzbhelper.model.BattleReport;
 import stzbhelper.model.Report;
@@ -33,18 +34,17 @@ public class MessageParser {
     } else if (cmdId == 92) {
       if (GlobalState.exVar.needGetBattleData) {
         parseBattleData(data);
-      }
-      if (GlobalState.exVar.needGetReport) {
+      } else if (GlobalState.exVar.needGetReport) {
         parseReport(data);
       }
     }
   }
 
   private void parseTeamUser(byte[] data) {
-    System.out.println("Received team member raw data, size: " + data.length + " bytes");
+    LogUtil.info("收到同盟成员消息");
     byte[] msgData = ProtocolDecoder.parseZlibData(data);
     if (msgData.length == 0) {
-      System.out.println("Failed to decompress team member data");
+      LogUtil.info("同盟成员消息解析失败");
       return;
     }
     try {
@@ -58,11 +58,11 @@ public class MessageParser {
           ids.add(user.id);
         }
       }
-      System.out.println("Successfully parsed " + users.size() + " team members from packet");
+      LogUtil.info("同盟成员消息解析成功！共" + users.size() + "人");
       storage.saveTeamUsers(users);
       storage.deleteTeamUsersNotIn(ids);
     } catch (Exception e) {
-      System.out.println("Error parsing team member JSON: " + e.getMessage());
+      LogUtil.info("同盟成员消息解析失败: " + e.getMessage());
     }
   }
 
