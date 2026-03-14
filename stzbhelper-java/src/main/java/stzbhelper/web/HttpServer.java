@@ -40,7 +40,6 @@ public class HttpServer {
     app.options("/*", ctx -> ctx.status(200));
 
     app.get("/", ctx -> ctx.redirect("/index.html"));
-    app.get("/data.html", ctx -> ctx.redirect("/index.html"));
     app.get("/battle", ctx -> ctx.redirect("/battle.html"));
     
     app.before("/v1/*", ctx -> {
@@ -69,8 +68,11 @@ public class HttpServer {
     }));
 
     addAny("/v1/stzb/player/team/get", wrap(ctx -> {
-      List<PlayerTeam> teams = storage.getPlayerTeams();
-      System.out.println("API Response: getPlayerTeams returned " + teams.size() + " records");
+      String atkName = ctx.queryParam("atkname");
+      String atkUnionName = ctx.queryParam("atkunionname");
+      String idu = ctx.queryParam("idu");
+      List<Map<String, Object>> teams = storage.getPlayerTeam(atkName, atkUnionName, idu);
+      System.out.println("API Response: getPlayerTeam returned " + teams.size() + " records");
       ctx.json(ApiResponse.success(teams));
     }));
 

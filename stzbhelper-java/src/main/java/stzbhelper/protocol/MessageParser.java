@@ -32,10 +32,14 @@ public class MessageParser {
     if (cmdId == 103) {
       parseTeamUser(data);
     } else if (cmdId == 92) {
+      LogUtil.info("收到同盟战报消息");
       if (GlobalState.exVar.needGetBattleData) {
+        LogUtil.info("已开启获取详细战报,目前会暂停考勤战报的获取");
         parseBattleData(data);
       } else if (GlobalState.exVar.needGetReport) {
         parseReport(data);
+      } else {
+        LogUtil.info("由于未开启获取战报,本次跳过解析");
       }
     }
   }
@@ -67,9 +71,8 @@ public class MessageParser {
   }
 
   private void parseReport(byte[] data) {
-    System.out.println("Received team battle report message");
     if (!GlobalState.exVar.needGetReport) {
-      System.out.println("Report collection disabled, skipping parsing.");
+      LogUtil.info("由于未开启获取战报,本次跳过解析");
       return;
     }
     byte[] msgData = ProtocolDecoder.parseZlibData(data);
