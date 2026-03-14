@@ -5,7 +5,37 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StzbHelper - 率土之滨攻城考勤助手</title>
-    <script type="module" crossorigin src="/assets/index-bnUbepNT.js"></script>
+    <script>
+      (function () {
+        function isBattleRoute() {
+          return window.location.hash && window.location.hash.indexOf("#/team") === 0;
+        }
+        function renderBattle() {
+          var app = document.getElementById("app");
+          if (!app) {
+            setTimeout(renderBattle, 0);
+            return;
+          }
+          document.body.style.margin = "0";
+          app.innerHTML =
+            '<iframe src="/battle.html" ' +
+            'style="border:0;width:100%;height:100vh;display:block;"></iframe>';
+        }
+        if (isBattleRoute()) {
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", renderBattle);
+          } else {
+            renderBattle();
+          }
+          return;
+        }
+        var s = document.createElement("script");
+        s.type = "module";
+        s.crossOrigin = "";
+        s.src = "/assets/index-bnUbepNT.js";
+        document.head.appendChild(s);
+      })();
+    </script>
     <link rel="stylesheet" crossorigin href="/assets/index-GDlDSeKL.css">
   </head>
   <body>

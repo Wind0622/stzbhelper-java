@@ -34,6 +34,7 @@ public class HttpServer {
 
     app.get("/", ctx -> ctx.redirect("/index.html"));
     app.get("/data.html", ctx -> ctx.redirect("/index.html"));
+    app.get("/battle", ctx -> ctx.redirect("/battle.html"));
     
     app.before("/v1/*", ctx -> {
       System.out.println("API Request: " + ctx.method() + " " + ctx.path());
@@ -261,13 +262,11 @@ public class HttpServer {
 
     addAny("/v1/enable/getBattleReport", wrap(ctx -> {
       GlobalState.exVar.needGetBattleData = true;
-      System.out.println("Switching: Detailed Battle Data Collection = ENABLED");
       ctx.json(ApiResponse.success(null));
     }));
 
     addAny("/v1/disable/getBattleReport", wrap(ctx -> {
       GlobalState.exVar.needGetBattleData = false;
-      System.out.println("Switching: Detailed Battle Data Collection = DISABLED");
       ctx.json(ApiResponse.success(null));
     }));
   }

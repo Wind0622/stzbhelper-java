@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>详细战报列表 - StzbHelper</title>
+    <style>
+      :root {
+        --bg: #f8f9fb;
+        --card: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+        --line: #e5e7eb;
+        --accent: #2563eb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
+      header {
+        padding: 20px 24px 8px;
+      }
+      h1 {
+        margin: 0 0 4px 0;
+        font-size: 20px;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .container {
+        padding: 16px 24px 32px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+      }
+      .filters {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(120px, 1fr));
+        gap: 10px;
+      }
+      .filters label {
+        font-size: 12px;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 4px;
+      }
+      .filters input,
+      .filters select {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        font-size: 13px;
+      }
+      .actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .btn {
+        border: 1px solid var(--accent);
+        color: #fff;
+        background: var(--accent);
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .btn.secondary {
+        color: var(--accent);
+        background: #fff;
+      }
+      .status {
+        margin-left: auto;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
+      th, td {
+        border-bottom: 1px solid var(--line);
+        padding: 8px 6px;
+        font-size: 12px;
+        vertical-align: top;
+      }
+      th {
+        text-align: left;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .mono {
+        font-family: Consolas, "Courier New", monospace;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: #f3f4f6;
+        font-size: 11px;
+        color: #374151;
+      }
+      .footer-actions {
+        display: flex;
+        justify-content: center;
+        margin-top: 16px;
+      }
+      @media (max-width: 1100px) {
+        .filters {
+          grid-template-columns: repeat(3, minmax(120px, 1fr));
+        }
+      }
+      @media (max-width: 700px) {
+        .filters {
+          grid-template-columns: repeat(2, minmax(120px, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>详细战报列表</h1>
+      <div class="sub">数据来源：/v1/stzb/report/list</div>
+    </header>
+    <div class="container">
+      <div class="card">
+        <div class="filters">
+          <div>
+            <label>攻击方名称</label>
+            <input id="atkName" placeholder="支持模糊匹配" />
+          </div>
+          <div>
+            <label>同盟名称</label>
+            <input id="atkUnion" placeholder="攻击/防守同盟" />
+          </div>
+          <div>
+            <label>最低兵力</label>
+            <input id="atkHp" type="number" placeholder="例如 10000" />
+          </div>
+          <div>
+            <label>最低等级</label>
+            <input id="atkLevel" type="number" placeholder="例如 15" />
+          </div>
+          <div>
+            <label>最低星级</label>
+            <input id="atkStar" type="number" placeholder="例如 30" />
+          </div>
+          <div>
+            <label>类型</label>
+            <select id="type">
+              <option value="1">全部</option>
+              <option value="2">仅攻击方</option>
+              <option value="3">仅防守方</option>
+              <option value="4">严格匹配</option>
+            </select>
+          </div>
+          <div>
+            <label>过滤 NPC</label>
+            <select id="nonpc">
+              <option value="0">包含 NPC</option>
+              <option value="1">仅非 NPC</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="refreshBtn">刷新</button>
+          <button class="btn secondary" id="loadMoreBtn">加载更多</button>
+          <div class="status" id="status">准备就绪</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>时间</th>
+              <th>坐标</th>
+              <th>攻击方</th>
+              <th>防守方</th>
+              <th>兵力</th>
+              <th>结果</th>
+              <th>NPC</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div class="footer-actions">
+          <button class="btn secondary" id="loadMoreBtnBottom">加载更多</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const MAX_NEXT_ID = 2147483647;
+      let nextId = MAX_NEXT_ID;
+      let loading = false;
+
+      const qs = (id) => document.getElementById(id);
+      const statusEl = qs("status");
+      const tbody = qs("tbody");
+
+      function formatTime(ts) {
+        if (!ts) return "";
+        const d = new Date(ts * 1000);
+        const pad = (v) => String(v).padStart(2, "0");
+        return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      }
+
+      function buildQuery() {
+        const p = new URLSearchParams();
+        p.set("nextid", nextId);
+        const atkName = qs("atkName").value.trim();
+        const atkUnion = qs("atkUnion").value.trim();
+        const atkHp = qs("atkHp").value.trim();
+        const atkLevel = qs("atkLevel").value.trim();
+        const atkStar = qs("atkStar").value.trim();
+        const type = qs("type").value;
+        const nonpc = qs("nonpc").value;
+        if (atkName) p.set("atkname", atkName);
+        if (atkUnion) p.set("atkunionname", atkUnion);
+        if (atkHp) p.set("atkhp", atkHp);
+        if (atkLevel) p.set("atklevel", atkLevel);
+        if (atkStar) p.set("atkstar", atkStar);
+        if (type) p.set("type", type);
+        if (nonpc === "1") p.set("nonpc", "1");
+        return p.toString();
+      }
+
+      async function fetchReports(reset) {
+        if (loading) return;
+        loading = true;
+        statusEl.textContent = "加载中...";
+        try {
+          if (reset) {
+            nextId = MAX_NEXT_ID;
+            tbody.innerHTML = "";
+          }
+          const res = await fetch(`/v1/stzb/report/list?${buildQuery()}`);
+          const json = await res.json();
+          if (json.code !== 200) {
+            statusEl.textContent = json.msg || "请求失败";
+            loading = false;
+            return;
+          }
+          const list = (json.data && json.data.report) || [];
+          if (!list.length) {
+            statusEl.textContent = "没有更多数据";
+            loading = false;
+            return;
+          }
+          for (const row of list) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td class="mono">${row.id}</td>
+              <td>${formatTime(row.time)}</td>
+              <td>${row.wid_name || ""}</td>
+              <td>
+                ${row.attack_name || ""}<br />
+                <span class="pill">${row.attack_union_name || "-"}</span><br />
+                <span class="pill">${row.attack_clan_name || "-"}</span>
+              </td>
+              <td>
+                ${row.defend_name || ""}<br />
+                <span class="pill">${row.defend_union_name || "-"}</span><br />
+                <span class="pill">${row.defend_clan_name || "-"}</span>
+              </td>
+              <td class="mono">${row.attack_hp || 0} / ${row.defend_hp || 0}</td>
+              <td>${row.result === 1 ? "胜" : row.result === 0 ? "负" : row.result}</td>
+              <td>${row.npc === 1 ? "是" : "否"}</td>
+            `;
+            tbody.appendChild(tr);
+          }
+          nextId = list[list.length - 1].id || nextId;
+          statusEl.textContent = `已加载 ${tbody.children.length} 条`;
+        } catch (e) {
+          statusEl.textContent = `请求失败: ${e}`;
+        } finally {
+          loading = false;
+        }
+      }
+
+      qs("refreshBtn").addEventListener("click", () => fetchReports(true));
+      qs("loadMoreBtn").addEventListener("click", () => fetchReports(false));
+      qs("loadMoreBtnBottom").addEventListener("click", () => fetchReports(false));
+    </script>
+  </body>
+</html>
