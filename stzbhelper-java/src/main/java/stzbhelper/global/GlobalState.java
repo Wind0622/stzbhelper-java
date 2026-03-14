@@ -16,4 +16,6 @@ public final class GlobalState {
   public static volatile int needBufSize = 0;
 
   public static volatile boolean databaseSelected = false;
+  public static volatile String currentDbName = "";
+  public static volatile int capturePort = 8001;
 }

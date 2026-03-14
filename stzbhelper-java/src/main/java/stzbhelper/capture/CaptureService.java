@@ -17,6 +17,12 @@ import stzbhelper.protocol.ProtocolDecoder;
 public class CaptureService {
   private final CommandDispatcher dispatcher;
   private final PacketAssembler assembler = new PacketAssembler();
+  private final java.util.concurrent.ExecutorService dispatcherExecutor =
+      java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "packet-dispatcher");
+        t.setDaemon(true);
+        return t;
+      });
 
   public CaptureService(CommandDispatcher dispatcher) {
     this.dispatcher = dispatcher;
@@ -37,8 +43,14 @@ public class CaptureService {
   private void captureTCPPackets(PcapNetworkInterface device) {
     try {
       PcapHandle handle = device.openLive(65535, PromiscuousMode.PROMISCUOUS, 10);
-      handle.setFilter("tcp and src port 8001", BpfProgram.BpfCompileMode.OPTIMIZE);
+      int lastPort = GlobalState.capturePort;
+      handle.setFilter(buildFilter(lastPort), BpfProgram.BpfCompileMode.OPTIMIZE);
       while (true) {
+        int currentPort = GlobalState.capturePort;
+        if (currentPort != lastPort && currentPort > 0) {
+          handle.setFilter(buildFilter(currentPort), BpfProgram.BpfCompileMode.OPTIMIZE);
+          lastPort = currentPort;
+        }
         Packet packet = handle.getNextPacket();
         if (packet == null) {
           continue;
@@ -69,21 +81,41 @@ public class CaptureService {
           }
         }
 
+        int cmdId = ProtocolDecoder.readInt32(full, 4);
         if (GlobalState.exVar.bindIpInfo
             && !GlobalState.onlySrcIp.isEmpty()
             && !GlobalState.onlyDstIp.isEmpty()) {
           if (!GlobalState.onlySrcIp.equals(srcIp) || !GlobalState.onlyDstIp.equals(dstIp)) {
-            if (GlobalState.isDebug) {
-              System.out.println("IP mismatch, skipping data processing");
+            if (cmdId != 3686) {
+              if (GlobalState.isDebug) {
+                System.out.println("IP mismatch, skipping data processing");
+              }
+              continue;
             }
-            continue;
           }
         }
 
-        dispatcher.dispatch(full, srcIp, dstIp);
+        final byte[] packetCopy = full;
+        final String srcCopy = srcIp;
+        final String dstCopy = dstIp;
+        dispatcherExecutor.execute(() -> {
+          try {
+            dispatcher.dispatch(packetCopy, srcCopy, dstCopy);
+          } catch (Exception ignored) {
+            // ignore dispatch failures to keep capture running
+          }
+        });
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private String buildFilter(int port) {
+    if (port <= 0 || port == 8001) {
+      return "tcp and (src port 8001 or dst port 8001)";
+    }
+    return "tcp and (src port 8001 or dst port 8001 or src port "
+        + port + " or dst port " + port + ")";
   }
 }

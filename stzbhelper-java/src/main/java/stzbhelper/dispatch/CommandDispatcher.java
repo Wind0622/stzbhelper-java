@@ -53,16 +53,22 @@ public class CommandDispatcher {
       return;
     }
 
-    if (cmdId == 3686 && !GlobalState.databaseSelected) {
+    if (cmdId == 3686) {
       handleDatabaseSelection(packet, dataType, srcIp, dstIp);
     }
 
-    if (dataType != 3) {
+    if (dataType != 3 && dataType != 5) {
       return;
     }
 
-    byte[] payload = ProtocolDecoder.extractPayload(packet);
-    byte[] data = ProtocolDecoder.decodeData(dataType, payload);
+    byte[] data;
+    if (dataType == 3) {
+      byte[] payload = ProtocolDecoder.extractPayload(packet);
+      data = ProtocolDecoder.decodeData(dataType, payload);
+    } else {
+      byte[] raw = Arrays.copyOfRange(packet, 12, packet.length);
+      data = ProtocolDecoder.decodeData(dataType, raw);
+    }
     parser.parseData(cmdId, data);
   }
 
@@ -96,15 +102,25 @@ public class CommandDispatcher {
       String roleName = String.valueOf(roleNameObj);
       String serverName = String.valueOf(serverList.get(0));
       String dbName = roleName + "_" + serverName;
+      int serverPort = extractServerPort(serverList);
+      if (serverPort > 0) {
+        GlobalState.capturePort = serverPort;
+      }
 
       LogUtil.info("服务器信息: " + formatServerInfo(serverList));
       LogUtil.info("角色名: " + roleName);
       LogUtil.info("本地IP：" + dstIp);
       LogUtil.info("游戏服务器IP：" + srcIp);
       LogUtil.info("收到主公簿数据，将打开数据库文件" + dbName + ".db");
-      storage.switchTo(dbName);
+      if (!dbName.equals(GlobalState.currentDbName)) {
+        storage.switchTo(dbName);
+        GlobalState.currentDbName = dbName;
+      }
       GlobalState.onlySrcIp = srcIp;
       GlobalState.onlyDstIp = dstIp;
+      if (shouldBindIp()) {
+        GlobalState.exVar.bindIpInfo = true;
+      }
       GlobalState.databaseSelected = true;
     } catch (Exception e) {
       LogUtil.info("\u6570\u636e\u5e93\u9009\u62e9\u89e3\u6790\u5931\u8d25: " + e.getMessage());
@@ -128,5 +144,46 @@ public class CommandDispatcher {
     }
     sb.append("]");
     return sb.toString();
+  }
+
+  private boolean shouldBindIp() {
+    String env = System.getenv("STZB_BIND_IP");
+    if (env != null && !env.isBlank()) {
+      return "1".equals(env) || "true".equalsIgnoreCase(env);
+    }
+    String prop = System.getProperty("stzb.bind.ip");
+    if (prop != null && !prop.isBlank()) {
+      return "1".equals(prop) || "true".equalsIgnoreCase(prop);
+    }
+    return false;
+  }
+
+  private int extractServerPort(List<?> serverList) {
+    if (serverList == null || serverList.isEmpty()) {
+      return 0;
+    }
+    int candidate = 0;
+    for (Object item : serverList) {
+      if (item instanceof Number) {
+        int v = ((Number) item).intValue();
+        if (v >= 1024 && v <= 65535) {
+          if (v > candidate) {
+            candidate = v;
+          }
+        }
+      } else if (item != null) {
+        try {
+          int v = Integer.parseInt(String.valueOf(item));
+          if (v >= 1024 && v <= 65535) {
+            if (v > candidate) {
+              candidate = v;
+            }
+          }
+        } catch (NumberFormatException ignored) {
+          // ignore
+        }
+      }
+    }
+    return candidate;
   }
 }
